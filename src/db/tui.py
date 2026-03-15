@@ -23,13 +23,6 @@ class TUI:
         print("5. Удалить")
         print("0. Назад")
 
-    def _read_int(self, prompt):
-        while True:
-            try:
-                return int(input(prompt).strip())
-            except:
-                print("Ошибка: введите число")
-
     def _read_str(self, prompt, required=False):
         val = input(prompt).strip()
         return val if val or not required else None
