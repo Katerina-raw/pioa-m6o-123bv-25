@@ -1,4 +1,3 @@
-# tui.py
 from src.db.backend.memory import Database
 
 
