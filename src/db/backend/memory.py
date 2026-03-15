@@ -5,8 +5,8 @@ class Database:
     def create_table(self, table_header, table_name):
         self.tables[table_name] = Table(table_header)
 
-    def select(self, name_table, filter_cols):
-        self.tables[name_table].select(filter_cols)
+    def select(self, name_table, filter_cols=None):
+        return self.tables[name_table].select(filter_cols)
 
     def insert(self, name_table, cols):
         self.tables[name_table].insert(cols)
