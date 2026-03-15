@@ -5,6 +5,7 @@ from src.db.backend.memory import Database
 class TUI:
     def __init__(self):
         self.db = Database()
+        # Создаем тестовую таблицу
         self.db.create_table({"id": "id", "name": "name", "age": "age"}, "students")
 
     def _print_menu(self):
@@ -35,7 +36,8 @@ class TUI:
             print(f"- {name}")
         return True
 
-    def _get_columns(self, table):
+    def _get_columns(self, table_name):
+        table = self.db.tables[table_name]
         return list(table.table.keys())
 
     def _show_records(self, records):
@@ -92,38 +94,46 @@ class TUI:
             print("Таблица не найдена")
             return
 
-        table = self.db.tables[name]
-        cols = self._get_columns(table)
+        columns = self._get_columns(name)
 
         while True:
             self._print_table_menu(name)
             cmd = input("Выберите: ").strip()
 
             if cmd == "1":
-                self._show_records(table.select())
+                records = self.db.select(name)
+                self._show_records(records)
+
             elif cmd == "2":
-                data = self._input_record(cols)
+                data = self._input_record(columns)
                 if data:
-                    table.insert(data)
+                    self.db.insert(name, data)
                     print("Добавлено")
+
             elif cmd == "3":
-                filt = self._input_filter(cols)
-                self._show_records(table.select(filt if filt else None))
+                filt = self._input_filter(columns)
+                if filt:
+                    records = self.db.select(name, filt)
+                else:
+                    records = self.db.select(name)
+                self._show_records(records)
+
             elif cmd == "4":
                 print("Фильтр для обновления:")
-                filt = self._input_filter(cols)
+                filt = self._input_filter(columns)
                 print("Новые данные:")
-                data = self._input_record(cols)
+                data = self._input_record(columns)
                 if data:
-                    table.update(filt if filt else None, data)
+                    self.db.update(name, filt, data)
                     print("Обновлено")
             elif cmd == "5":
                 print("Фильтр для удаления:")
-                filt = self._input_filter(cols)
+                filt = self._input_filter(columns)
                 if filt or input("Удалить все? (y/n): ").lower() == 'y':
-                    table.delete(filt if filt else None)
+                    self.db.delete(name, filt)
                     print("Удалено")
-            elif cmd == "0":
+
+            elif cmd == "0":  # Назад
                 break
 
     def loop(self):
@@ -145,3 +155,10 @@ class TUI:
             if cmd != "0":
                 input("Enter...")
 
+
+def run():
+    TUI().loop()
+
+
+if __name__ == "__main__":
+    run()
