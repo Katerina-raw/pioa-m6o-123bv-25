@@ -18,6 +18,7 @@ class Database:
         self.tables[name_table].update(filters, cols)
 
 
+
 class Table:
     def __init__(self, table_header):
         self.table = {}
