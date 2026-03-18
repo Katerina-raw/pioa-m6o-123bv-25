@@ -4,7 +4,6 @@ from src.db.backend.memory import Database
 class TUI:
     def __init__(self):
         self.db = Database()
-        # Создаем тестовую таблицу
         self.db.create_table({"id": "id", "name": "name", "age": "age"}, "students")
 
     def _print_menu(self):

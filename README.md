@@ -6,11 +6,18 @@
 ├── src/
 │ └── db/
 │ ├── backend/
-│ │ ├── init.py
+│ │ ├── __init__.py
 │ │ └── memory.py
-│ ├── init.py
+│ ├── __init__.py
 │ ├── main.py
 │ └── tui.py 
+├── tests
+│ └── db/
+│ ├── backend/
+│ │ ├── __init__.py
+│ │ └── test_memory.py
+│ ├── __init__.py
+│ ├── test_tui.py
 │
 └── README.md
 ```
