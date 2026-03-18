@@ -87,3 +87,5 @@ age: 21
 age: 21
 Удалено
 ```
+
+![2fee0c22dde023ba1668b7d6a8593b4b.jpg](2fee0c22dde023ba1668b7d6a8593b4b.jpg)
