@@ -1,4 +1,4 @@
-from src.db.backend.memory import Database
+from src.db.backend.memory import Database, FileDataBase
 
 
 def test_create_table():
@@ -68,3 +68,33 @@ def test_update_many():
     db.update('users', filters={'id': 1, 'sex': 'fem'}, cols={'name': 'alex'})
     response = db.select('users')
     assert response == [[1, 'alex', 'male'], [2, 'alex', 'fem']]
+
+
+def test_json(tmp_path):
+    path = tmp_path / 'test.json'
+
+    db = FileDataBase(path, json=True)
+    db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
+    db.insert('users', {'id': 1, 'name': 'ivan', 'sex': 'male'})
+    db.insert('users', {'id': 2, 'name': 'kate', 'sex': 'fem'})
+    db.update('users', filters={'id': 1, 'sex': 'fem'}, cols={'name': 'alex'})
+
+    db2 = FileDataBase(path, json=True)
+    db2.open_db()
+    response = db2.select('users')
+    assert response == [[1, 'alex', 'male'], [2, 'alex', 'fem']]
+
+
+def test_csv(tmp_path):
+    path = tmp_path
+
+    db = FileDataBase(path, csv=True)
+    db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
+    db.insert('users', {'id': 1, 'name': 'ivan', 'sex': 'male'})
+    db.insert('users', {'id': 2, 'name': 'kate', 'sex': 'fem'})
+    db.update('users', filters={'id': 1, 'sex': 'fem'}, cols={'name': 'alex'})
+
+    db2 = FileDataBase(path, csv=True)
+    db2.open_db()
+    response = db2.select('users')
+    assert response == [['1', 'alex', 'male'], ['2', 'alex', 'fem']]

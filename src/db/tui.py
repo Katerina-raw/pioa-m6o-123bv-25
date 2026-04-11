@@ -1,10 +1,16 @@
-from src.db.backend.memory import Database
+from src.db.backend.memory import Database, FileDataBase
 
 
 class TUI:
     def __init__(self):
         self.db = Database()
         self.db.create_table({"id": "id", "name": "name", "age": "age"}, "students")
+
+    def _print_main_menu(self):
+        print('С какой базой данных работать?')
+        print('1. JSON')
+        print('2. CSV')
+        print('3. В памяти')
 
     def _print_menu(self):
         print("\n=== База данных ===")
@@ -135,6 +141,22 @@ class TUI:
                 break
 
     def loop(self):
+        while True:
+            self._print_main_menu()
+            cmd = cmd = input("Выберите: ").strip()
+            if cmd == "1":
+                path = input("Введите путь в формате *.json: ").strip()
+                self.db = FileDataBase(path, json=True)
+                break
+            elif cmd == "2":
+                path = input("Введите путь до дирректории: ").strip()
+                self.db = FileDataBase(path, csv=True)
+                break
+            elif cmd == "3":
+                break
+            else:
+                print('Ошибка')
+
         while True:
             self._print_menu()
             cmd = input("Выберите: ").strip()

@@ -1,3 +1,6 @@
+import json, os, csv
+
+
 class Database:
     def __init__(self):
         self.tables = {}
@@ -18,13 +21,88 @@ class Database:
         self.tables[name_table].update(filters, cols)
 
 
+class FileDataBase(Database):
+    def __init__(self, path, json=False, csv=False):
+        self.json = json
+        self.csv = csv
+        self.path = path
+        if json == csv:
+            raise TypeError('FileDataBase must be json or csv')
+
+        super().__init__()
+
+    def save_db(self):
+        if self.json:
+            self._save_db_json()
+        else:
+            self._save_db_csv()
+
+    def open_db(self):
+        if self.json:
+            self._open_db_json()
+        else:
+            self._open_db_csv()
+
+    def _save_db_json(self):
+        data = {'tables': []}
+        for table_name, table in self.tables.items():
+            data['tables'].append({'table_name': table_name, 'table': table.serialize()})
+
+        with open(self.path, 'w') as f:
+            json.dump(data, f)
+
+    def _open_db_json(self):
+        with open(self.path, 'r') as f:
+            data = json.load(f)
+            for table_data in data['tables']:
+                table = Table([])
+                table.table = table_data['table']
+                self.tables[table_data['table_name']] = table
+
+    def _save_db_csv(self):
+        for table_name, table in self.tables.items():
+            save_data = []
+            table_data = table.serialize()
+            save_data.append(list(table_data.keys()))
+            save_data.extend(table.select())
+            with open(os.path.join(self.path, f'{table_name}.csv'), 'w') as f:
+                csv.writer(f).writerows(save_data)
+
+    def _open_db_csv(self):
+        files = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f)) and f.endswith('.csv')]
+        for path in files:
+            with open(os.path.join(self.path, path), 'r') as f:
+                data = csv.reader(f)
+                header = next(data)
+                table = Table(header)
+                for i in data:
+                    table.insert({col: value for col, value in zip(header, i)})
+
+                self.tables[next(iter(path.split('.csv')))] = table
+
+    def create_table(self, *arg, **kwargs):
+        super().create_table(*arg, **kwargs)
+        self.save_db()
+
+    def insert(self, *arg, **kwargs):
+        super().insert(*arg, **kwargs)
+        self.save_db()
+
+    def delete(self, *arg, **kwargs):
+        super().delete(*arg, **kwargs)
+        self.save_db()
+
+    def update(self, *arg, **kwargs):
+        super().update(*arg, **kwargs)
+        self.save_db()
+
 
 class Table:
     def __init__(self, table_header):
         self.table = {}
 
         for i in table_header:
-            self.table[table_header[i]] = []
+            self.table[i] = []
 
     def select(self, filter_cols=None):
         result = []
@@ -78,3 +156,8 @@ class Table:
             res.append(self.table[i][index])
 
         return res
+
+    def serialize(self) -> dict:
+        return self.table
+
+

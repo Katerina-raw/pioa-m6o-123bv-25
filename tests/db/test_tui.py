@@ -140,7 +140,7 @@ def test_work_with_table_delete(monkeypatch):
         mock.assert_called()
 
 def test_loop_create(monkeypatch):
-    inputs = ['1', '', '0']
+    inputs = ['3', '1', '', '0']  # Добавлен выбор БД в памяти (3)
     monkeypatch.setattr('builtins.input', lambda x: inputs.pop(0))
     tui = TUI()
     with patch.object(tui, '_create_table') as mock:
@@ -148,7 +148,7 @@ def test_loop_create(monkeypatch):
         mock.assert_called()
 
 def test_loop_show(monkeypatch):
-    inputs = ['2', '', '0']
+    inputs = ['3', '2', '', '0']  # Добавлен выбор БД в памяти (3)
     monkeypatch.setattr('builtins.input', lambda x: inputs.pop(0))
     tui = TUI()
     with patch.object(tui, '_show_tables') as mock:
@@ -156,7 +156,7 @@ def test_loop_show(monkeypatch):
         mock.assert_called()
 
 def test_loop_work(monkeypatch):
-    inputs = ['3', '', '0']
+    inputs = ['3', '3', '', '0']  # Добавлен выбор БД в памяти (3)
     monkeypatch.setattr('builtins.input', lambda x: inputs.pop(0))
     tui = TUI()
     with patch.object(tui, '_work_with_table') as mock:
@@ -164,7 +164,7 @@ def test_loop_work(monkeypatch):
         mock.assert_called()
 
 def test_loop_bad_command(monkeypatch, capsys):
-    inputs = ['99', '', '0']
+    inputs = ['3', '99', '', '0']  # Добавлен выбор БД в памяти (3)
     monkeypatch.setattr('builtins.input', lambda x: inputs.pop(0))
     tui = TUI()
     tui.loop()
