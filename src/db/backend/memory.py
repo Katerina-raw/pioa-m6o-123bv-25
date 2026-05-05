@@ -17,6 +17,8 @@ class Database:
     def update(self, name_table, filters, cols):
         self.tables[name_table].update(filters, cols)
 
+    def get_len_header(self, name_table):
+        return self.tables[name_table].get_len_header()
 
 
 class Table:
@@ -82,3 +84,6 @@ class Table:
             res.append(self.table[i][index])
 
         return res
+
+    def get_len_header(self):
+        return len(self.table)
