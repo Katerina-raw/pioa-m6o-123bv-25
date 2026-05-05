@@ -129,30 +129,45 @@ class Table:
                 self.table[col].append(value)
 
     def delete(self, filter_cols):
-        indexes = set()
+        if not self.table:
+            return
 
-        for col, value in filter_cols.items():
-            now_col = self.table[col]
-            for i in range(len(now_col)):
-                if now_col[i] == value:
-                    indexes.add(i)
+        num_rows = len(self.table[next(iter(self.table.keys()))])
+        indexes_to_delete = set()
 
-        for index in indexes:
+        for i in range(num_rows):
+            match = True
+            for col, value in filter_cols.items():
+                if col not in self.table or self.table[col][i] != value:
+                    match = False
+                    break
+            if match:
+                indexes_to_delete.add(i)
+
+        for index in sorted(indexes_to_delete, reverse=True):
             for col in self.table.keys():
                 self.table[col].pop(index)
 
     def update(self, filters, cols_data):
-        indexes = set()
+        if not self.table:
+            return
 
-        for col, value in filters.items():
-            now_col = self.table[col]
-            for i in range(len(now_col)):
-                if now_col[i] == value:
-                    indexes.add(i)
+        num_rows = len(self.table[next(iter(self.table.keys()))])
+        indexes_to_update = set()
 
-        for index in indexes:
+        for i in range(num_rows):
+            match = True
+            for col, value in filters.items():
+                if col not in self.table or self.table[col][i] != value:
+                    match = False
+                    break
+            if match:
+                indexes_to_update.add(i)
+
+        for index in indexes_to_update:
             for col, value in cols_data.items():
-                self.table[col][index] = value
+                if col in self.table:
+                    self.table[col][index] = value
 
     def _get_row(self, index):
         res = []
