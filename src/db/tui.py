@@ -102,11 +102,18 @@ class TUI:
                 records = self.db.select(name)
                 self._show_records(records)
 
+
             elif cmd == "2":
                 data = self._input_record(columns)
+
                 if data:
-                    self.db.insert(name, data)
-                    print("Добавлено")
+                    if len(data) == self.db.get_len_header(name):
+                        self.db.insert(name, data)
+                        print("Добавлено")
+                    else:
+                        print('Ошибка')
+                else:
+                    print('Ощибка')
 
             elif cmd == "3":
                 filt = self._input_filter(columns)
