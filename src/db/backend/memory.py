@@ -111,11 +111,15 @@ class Table:
                 result.append(self._get_row(i))
             return result
 
-        for col, value in filter_cols.items():
-            now_col = self.table[col]
-            for i in range(len(now_col)):
-                if now_col[i] == value:
-                    result.append(self._get_row(i))
+        num_rows = len(self.table[next(iter(self.table.keys()))])
+        for i in range(num_rows):
+            match = True
+            for col, value in filter_cols.items():
+                if col not in self.table or self.table[col][i] != value:
+                    match = False
+                    break
+            if match:
+                result.append(self._get_row(i))
 
         return result
 
