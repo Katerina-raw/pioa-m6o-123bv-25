@@ -5,7 +5,7 @@ from src.db.backend.memory import Database
 def test_init():
     tui = TUI()
     assert type(tui.db) == Database
-    assert 'students' in tui.db._Database__tables
+    assert 'students' in tui.db._tables
 
 def test_print_menu(capsys):
     tui = TUI()
@@ -27,7 +27,7 @@ def test_read_str(monkeypatch):
 
 def test_show_tables_empty(capsys):
     tui = TUI()
-    tui.db._Database__tables = {}
+    tui.db._tables = {}
     result = tui._show_tables()
     captured = capsys.readouterr()
     assert result == False
@@ -35,7 +35,7 @@ def test_show_tables_empty(capsys):
 
 def test_show_tables_with_data(capsys):
     tui = TUI()
-    tui.db._Database__tables = {'users': None}
+    tui.db._tables = {'users': None}
     result = tui._show_tables()
     captured = capsys.readouterr()
     assert result == True
@@ -73,7 +73,7 @@ def test_create_table_success(monkeypatch, capsys):
     tui = TUI()
     tui._create_table()
     captured = capsys.readouterr()
-    assert 'mytable' in tui.db._Database__tables
+    assert 'mytable' in tui.db._tables
     assert 'создана' in captured.out
 
 def test_create_table_exists(monkeypatch, capsys):
@@ -159,7 +159,7 @@ def test_loop_bad_command(monkeypatch, capsys):
 
 def test_work_with_table_no_tables(monkeypatch, capsys):
     tui = TUI()
-    tui.db._Database__tables = {}
+    tui.db._tables = {}
     tui._work_with_table()
     captured = capsys.readouterr()
     assert "Нет таблиц" in captured.out

@@ -95,7 +95,7 @@ def test_csv(tmp_path):
     db.insert('users', {'id': 1, 'name': 'ivan', 'sex': 'male'})
     db.insert('users', {'id': 2, 'name': 'kate', 'sex': 'fem'})
     db.insert('users', {'id': 3, 'name': 'paul', 'sex': 'male'})
-    db.update('users', filters={'id': 1, 'sex': 'male'}, cols={'name': 'alex'})
+    db.update('users', {'id': 1, 'sex': 'male'}, cols={'name': 'alex'})
 
     db2 = FileDataBase(path, csv=True)
     db2.open_db()
