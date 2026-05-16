@@ -159,22 +159,25 @@ class TUI:
                 print('Ошибка')
 
         while True:
-            self._print_menu()
-            cmd = input("Выберите: ").strip()
+            try:
+                self._print_menu()
+                cmd = input("Выберите: ").strip()
 
-            if cmd == "1":
-                self._create_table()
-            elif cmd == "2":
-                self._show_tables()
-            elif cmd == "3":
-                self._work_with_table()
-            elif cmd == "0":
-                break
-            else:
-                print("Неверная команда")
+                if cmd == "1":
+                    self._create_table()
+                elif cmd == "2":
+                    self._show_tables()
+                elif cmd == "3":
+                    self._work_with_table()
+                elif cmd == "0":
+                    break
+                else:
+                    print("Неверная команда")
 
-            if cmd != "0":
-                input("Enter...")
+                if cmd != "0":
+                    input("Enter...")
+            except Exception as e:
+                print(e)
 
 
 def run():

@@ -4,7 +4,7 @@ from src.db.backend.memory import Database, FileDataBase
 def test_create_table():
     db = Database()
     db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
-    assert list(iter(db.tables['users'].table.keys())) == ['id', 'name', 'sex']
+    assert db.get_cols_name(table_name='users') == ['id', 'name', 'sex']
 
 
 def test_empty_select():
