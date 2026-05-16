@@ -136,8 +136,8 @@ class TUI:
                 break
 
     def loop(self):
-        try:
-            while True:
+        while True:
+            try:
                 self._print_menu()
                 cmd = input("Выберите: ").strip()
 
@@ -154,8 +154,8 @@ class TUI:
 
                 if cmd != "0":
                     input("Enter...")
-        except Exception as e:
-            print(e)
+            except Exception as e:
+                print(e)
 
 
 def run():
