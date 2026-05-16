@@ -1,24 +1,49 @@
 class Database:
     def __init__(self):
-        self.tables = {}
+        self.__tables = {}
 
     def create_table(self, table_header, table_name):
-        self.tables[table_name] = Table(table_header)
+        self.__tables[table_name] = Table(table_header)
 
     def select(self, name_table, filter_cols=None):
-        return self.tables[name_table].select(filter_cols)
+        if name_table in self.__tables:
+            return self.__tables[name_table].select(filter_cols)
+        else:
+            raise KeyError("Table {} does not exist".format(name_table))
 
     def insert(self, name_table, cols):
-        self.tables[name_table].insert(cols)
+        if name_table in self.__tables:
+            self.__tables[name_table].insert(cols)
+        else:
+            raise KeyError("Table {} does not exist".format(name_table))
 
     def delete(self, name_table, filter_cols):
-        self.tables[name_table].delete(filter_cols)
+        if name_table in self.__tables:
+            self.__tables[name_table].delete(filter_cols)
+        else:
+            raise KeyError("Table {} does not exist".format(name_table))
 
     def update(self, name_table, filters, cols):
-        self.tables[name_table].update(filters, cols)
+        if name_table in self.__tables:
+
+            self.__tables[name_table].update(filters, cols)
+        else:
+            raise KeyError("Table {} does not exist".format(name_table))
 
     def get_len_header(self, name_table):
-        return self.tables[name_table].get_len_header()
+        if name_table in self.__tables:
+            return self.__tables[name_table].get_len_header()
+        else:
+            raise KeyError("Table {} does not exist".format(name_table))
+
+    def get_tables_name(self):
+        return [i for i in self.__tables.keys()]
+
+    def get_cols_name(self, table_name):
+        if table_name in self.__tables:
+            return self.__tables[table_name].get_cols_name()
+        else:
+            raise KeyError("Table {} does not exist".format(table_name))
 
 
 class Table:
@@ -51,6 +76,8 @@ class Table:
         if set(cols.keys()) == set(self.table.keys()):
             for col, value in cols.items():
                 self.table[col].append(value)
+        else:
+            raise KeyError("Not found columns {}".format(set(cols.keys()) ^ set(self.table.keys())))
 
     def delete(self, filter_cols):
         if not self.table:
@@ -101,3 +128,6 @@ class Table:
 
     def get_len_header(self):
         return len(self.table)
+
+    def get_cols_name(self):
+        return [i for i in self.table.keys()]

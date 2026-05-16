@@ -27,16 +27,12 @@ class TUI:
         return val if val or not required else None
 
     def _show_tables(self):
-        if not self.db.tables:
+        if not self.db.get_tables_name():
             print("Нет таблиц")
             return False
-        for name in self.db.tables:
+        for name in self.db.get_tables_name():
             print(f"- {name}")
         return True
-
-    def _get_columns(self, table_name):
-        table = self.db.tables[table_name]
-        return list(table.table.keys())
 
     def _show_records(self, records):
         if not records:
@@ -63,7 +59,12 @@ class TUI:
 
     def _create_table(self):
         name = self._read_str("Имя таблицы: ", True)
-        if name in self.db.tables:
+
+        if name is None:
+            print('Ничего не введено')
+            return
+
+        if name in self.db.get_tables_name():
             print("Таблица уже есть")
             return
 
@@ -88,11 +89,11 @@ class TUI:
             return
 
         name = self._read_str("Имя таблицы: ", True)
-        if name not in self.db.tables:
+        if name not in self.db.get_tables_name():
             print("Таблица не найдена")
             return
 
-        columns = self._get_columns(name)
+        columns = self.db.get_cols_name(name)
 
         while True:
             self._print_table_menu(name)
@@ -105,15 +106,8 @@ class TUI:
 
             elif cmd == "2":
                 data = self._input_record(columns)
-
-                if data:
-                    if len(data) == self.db.get_len_header(name):
-                        self.db.insert(name, data)
-                        print("Добавлено")
-                    else:
-                        print('Ошибка')
-                else:
-                    print('Ощибка')
+                self.db.insert(name, data)
+                print("Добавлено")
 
             elif cmd == "3":
                 filt = self._input_filter(columns)
@@ -142,23 +136,26 @@ class TUI:
                 break
 
     def loop(self):
-        while True:
-            self._print_menu()
-            cmd = input("Выберите: ").strip()
+        try:
+            while True:
+                self._print_menu()
+                cmd = input("Выберите: ").strip()
 
-            if cmd == "1":
-                self._create_table()
-            elif cmd == "2":
-                self._show_tables()
-            elif cmd == "3":
-                self._work_with_table()
-            elif cmd == "0":
-                break
-            else:
-                print("Неверная команда")
+                if cmd == "1":
+                    self._create_table()
+                elif cmd == "2":
+                    self._show_tables()
+                elif cmd == "3":
+                    self._work_with_table()
+                elif cmd == "0":
+                    break
+                else:
+                    print("Неверная команда")
 
-            if cmd != "0":
-                input("Enter...")
+                if cmd != "0":
+                    input("Enter...")
+        except Exception as e:
+            print(e)
 
 
 def run():
