@@ -14,6 +14,12 @@ class Database:
         else:
             raise KeyError("Table {} does not exist".format(name_table))
 
+    def select_sorted(self, name_table, filter_cols=None, sort_field=None, ascending=True):
+        if name_table in self._tables:
+            return self._tables[name_table].select_sorted(filter_cols, sort_field, ascending)
+        else:
+            raise KeyError("Table {} does not exist".format(name_table))
+
     def insert(self, name_table, cols):
         if name_table in self._tables:
             self._tables[name_table].insert(cols)
@@ -48,6 +54,7 @@ class Database:
             return self._tables[table_name].get_cols_name()
         else:
             raise KeyError("Table {} does not exist".format(table_name))
+
 
 class FileDataBase(Database):
     def __init__(self, path, json=False, csv=False):
@@ -151,6 +158,22 @@ class Table:
                 result.append(self._get_row(i))
 
         return result
+
+    def select_sorted(self, filter_cols=None, sort_field=None, ascending=True):
+        rows = self.select(filter_cols)
+
+        if sort_field is None or not rows:
+            return rows
+
+        if sort_field not in self.table:
+            raise KeyError("Field '{}' does not exist".format(sort_field))
+
+        col_index = list(self.table.keys()).index(sort_field)
+        if all(map(lambda m: m.isdigit(), rows[col_index])):
+            rows.sort(key=lambda row: int(row[col_index]), reverse=not ascending)
+        else:
+            rows.sort(key=lambda row: row[col_index], reverse=not ascending)
+        return rows
 
     def insert(self, cols):
         if set(cols.keys()) == set(self.table.keys()):

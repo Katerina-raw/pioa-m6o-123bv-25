@@ -26,6 +26,7 @@ class TUI:
         print("3. Найти")
         print("4. Обновить")
         print("5. Удалить")
+        print('6. Получить сортированные записи')
         print("0. Назад")
 
     def _read_str(self, prompt, required=False):
@@ -138,13 +139,21 @@ class TUI:
                     self.db.delete(name, filt)
                     print("Удалено")
 
+            elif cmd == "6":
+                filt = self._input_filter(columns)
+                field = input("Поле для сортировки: ").strip()
+                order = input("Порядок сортировки:\n1. Вперед\n2. Реверс\n").strip().lower()
+                ascending = order != "2"
+                records = self.db.select_sorted(name, filt, field, ascending)
+                self._show_records(records)
+
             elif cmd == "0":  # Назад
                 break
 
     def loop(self):
         while True:
             self._print_main_menu()
-            cmd = cmd = input("Выберите: ").strip()
+            cmd = input("Выберите: ").strip()
             if cmd == "1":
                 path = input("Введите путь в формате *.json: ").strip()
                 self.db = FileDataBase(path, json=True)
