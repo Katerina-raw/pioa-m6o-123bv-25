@@ -1,4 +1,4 @@
-from src.db.backend.memory import Database, FileDataBase
+from src.db.backend.memory import Database, JSONDataBase, CSVDataBase
 
 
 class TUI:
@@ -150,17 +150,30 @@ class TUI:
             elif cmd == "0":  # Назад
                 break
 
+    def check_open(self):
+        while True:
+            cmd = input('Открыть уже существующую бд?\n1. Да\n2. Нет:\n')
+            if cmd  == '1':
+                self.db.open_db()
+                break
+            elif cmd == '2':
+                break
+            else:
+                print('Ошибка')
+
     def loop(self):
         while True:
             self._print_main_menu()
             cmd = input("Выберите: ").strip()
             if cmd == "1":
                 path = input("Введите путь в формате *.json: ").strip()
-                self.db = FileDataBase(path, json=True)
+                self.db = JSONDataBase(path)
+                self.check_open()
                 break
             elif cmd == "2":
                 path = input("Введите путь до дирректории: ").strip()
-                self.db = FileDataBase(path, csv=True)
+                self.db = CSVDataBase(path)
+                self.check_open()
                 break
             elif cmd == "3":
                 break

@@ -1,5 +1,4 @@
-from src.db.backend.memory import Database, FileDataBase
-
+from src.db.backend.memory import Database, JSONDataBase, CSVDataBase
 
 def test_create_table():
     db = Database()
@@ -39,6 +38,21 @@ def test_select_all():
     response = db.select('users')
     assert response == [[1, 'ivan', 'male'], [2, 'kate', 'fem']]
 
+def test_sorted_select():
+    db = Database()
+    db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
+    db.insert('users', {'id': '1', 'name': 'ivan', 'sex': 'male'})
+    db.insert('users', {'id': '2', 'name': 'kate', 'sex': 'fem'})
+    response = db.select_sorted('users', None, 'id')
+    assert response == [['1', 'ivan', 'male'], ['2', 'kate', 'fem']]
+
+def test_sorted_select_reverse():
+    db = Database()
+    db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
+    db.insert('users', {'id': '1', 'name': 'ivan', 'sex': 'male'})
+    db.insert('users', {'id': '2', 'name': 'kate', 'sex': 'fem'})
+    response = db.select_sorted('users', None, 'id', False)
+    assert response == list(reversed([['1', 'ivan', 'male'], ['2', 'kate', 'fem']]))
 
 def test_update():
     db = Database()
@@ -74,14 +88,14 @@ def test_update_many():
 def test_json(tmp_path):
     path = tmp_path / 'test.json'
 
-    db = FileDataBase(path, json=True)
+    db = JSONDataBase(path)
     db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
     db.insert('users', {'id': 1, 'name': 'ivan', 'sex': 'male'})
     db.insert('users', {'id': 2, 'name': 'kate', 'sex': 'fem'})
     db.insert('users', {'id': 3, 'name': 'paul', 'sex': 'male'})
     db.update('users', filters={'id': 1, 'sex': 'male'}, cols={'name': 'alex'})
 
-    db2 = FileDataBase(path, json=True)
+    db2 = JSONDataBase(path)
     db2.open_db()
     response = db2.select('users')
     assert response == [[1, 'alex', 'male'], [2, 'kate', 'fem'], [3, 'paul', 'male']]
@@ -90,14 +104,14 @@ def test_json(tmp_path):
 def test_csv(tmp_path):
     path = tmp_path
 
-    db = FileDataBase(path, csv=True)
+    db = CSVDataBase(path)
     db.create_table(table_name='users', table_header={'id': 'id', 'name': 'name', 'sex': 'sex'})
     db.insert('users', {'id': 1, 'name': 'ivan', 'sex': 'male'})
     db.insert('users', {'id': 2, 'name': 'kate', 'sex': 'fem'})
     db.insert('users', {'id': 3, 'name': 'paul', 'sex': 'male'})
     db.update('users', {'id': 1, 'sex': 'male'}, cols={'name': 'alex'})
 
-    db2 = FileDataBase(path, csv=True)
+    db2 = CSVDataBase(path)
     db2.open_db()
     response = db2.select('users')
     assert response == [['1', 'alex', 'male'], ['2', 'kate', 'fem'], ['3', 'paul', 'male']]

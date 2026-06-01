@@ -56,27 +56,16 @@ class Database:
             raise KeyError("Table {} does not exist".format(table_name))
 
 
-class FileDataBase(Database):
-    def __init__(self, path, json=False, csv=False):
-        self.json = json
-        self.csv = csv
+class JSONDataBase(Database):
+    def __init__(self, path):
         self.path = path
-        if json == csv:
-            raise TypeError('FileDataBase must be json or csv')
-
         super().__init__()
 
     def save_db(self):
-        if self.json:
-            self._save_db_json()
-        else:
-            self._save_db_csv()
+        self._save_db_json()
 
     def open_db(self):
-        if self.json:
-            self._open_db_json()
-        else:
-            self._open_db_csv()
+        self._open_db_json()
 
     def _save_db_json(self):
         data = {'tables': []}
@@ -93,6 +82,37 @@ class FileDataBase(Database):
                 table = Table([])
                 table.table = table_data['table']
                 self._tables[table_data['table_name']] = table
+
+    def create_table(self, *arg, **kwargs):
+        super().create_table(*arg, **kwargs)
+        self.save_db()
+
+    def insert(self, *arg, **kwargs):
+        super().insert(*arg, **kwargs)
+        self.save_db()
+
+    def delete(self, *arg, **kwargs):
+        super().delete(*arg, **kwargs)
+        self.save_db()
+
+    def update(self, *arg, **kwargs):
+        super().update(*arg, **kwargs)
+        self.save_db()
+
+
+class CSVDataBase(Database):
+    def __init__(self, path):
+        self.path = path
+        if json == csv:
+            raise TypeError('FileDataBase must be json or csv')
+
+        super().__init__()
+
+    def save_db(self):
+        self._save_db_csv()
+
+    def open_db(self):
+        self._open_db_csv()
 
     def _save_db_csv(self):
         for table_name, table in self._tables.items():
@@ -169,7 +189,7 @@ class Table:
             raise KeyError("Field '{}' does not exist".format(sort_field))
 
         col_index = list(self.table.keys()).index(sort_field)
-        if all(map(lambda m: m.isdigit(), rows[col_index])):
+        if all(map(lambda m: m[col_index].isdigit(), rows)):
             rows.sort(key=lambda row: int(row[col_index]), reverse=not ascending)
         else:
             rows.sort(key=lambda row: row[col_index], reverse=not ascending)
