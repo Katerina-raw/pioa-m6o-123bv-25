@@ -1,4 +1,6 @@
-import json, os, csv
+import json
+import os
+import csv
 
 
 class Database:
@@ -6,6 +8,8 @@ class Database:
         self._tables = {}
 
     def create_table(self, table_header, table_name):
+        if table_name in self._tables:
+            raise KeyError("Table {} already exists".format(table_name))
         self._tables[table_name] = Table(table_header)
 
     def select(self, name_table, filter_cols=None):
@@ -72,16 +76,19 @@ class JSONDataBase(Database):
         for table_name, table in self._tables.items():
             data['tables'].append({'table_name': table_name, 'table': table.serialize()})
 
-        with open(self.path, 'w') as f:
+        with open(self.path, 'w', encoding="utf-8") as f:
             json.dump(data, f)
 
     def _open_db_json(self):
-        with open(self.path, 'r') as f:
-            data = json.load(f)
-            for table_data in data['tables']:
-                table = Table([])
-                table.table = table_data['table']
-                self._tables[table_data['table_name']] = table
+        with open(self.path, 'r', encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                for table_data in data['tables']:
+                    table = Table([])
+                    table.table = table_data['table']
+                    self._tables[table_data['table_name']] = table
+            except Exception:
+                raise EOFError('File damaged or not exist')
 
     def create_table(self, *arg, **kwargs):
         super().create_table(*arg, **kwargs)
@@ -103,8 +110,6 @@ class JSONDataBase(Database):
 class CSVDataBase(Database):
     def __init__(self, path):
         self.path = path
-        if json == csv:
-            raise TypeError('FileDataBase must be json or csv')
 
         super().__init__()
 
@@ -124,17 +129,20 @@ class CSVDataBase(Database):
                 csv.writer(f).writerows(save_data)
 
     def _open_db_csv(self):
-        files = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f)) and f.endswith('.csv')]
-        for path in files:
-            with open(os.path.join(self.path, path), 'r') as f:
-                data = csv.reader(f)
-                header = next(data)
-                table = Table(header)
-                for i in data:
-                    if i:
-                        table.insert({col: value for col, value in zip(header, i)})
+        try:
+            files = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f)) and f.endswith('.csv')]
+            for path in files:
+                with open(os.path.join(self.path, path), 'r') as f:
+                    data = csv.reader(f)
+                    header = next(data)
+                    table = Table(header)
+                    for i in data:
+                        if i:
+                            table.insert({col: value for col, value in zip(header, i)})
 
-                self._tables[next(iter(path.split('.csv')))] = table
+                    self._tables[next(iter(path.split('.csv')))] = table
+        except Exception:
+            raise EOFError('Error while opening files')
 
     def create_table(self, *arg, **kwargs):
         super().create_table(*arg, **kwargs)
