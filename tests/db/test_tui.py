@@ -4,7 +4,7 @@ from src.db.backend.memory import Database
 
 def test_init():
     tui = TUI()
-    assert type(tui.db) == Database
+    assert isinstance(tui.db, Database)
     assert 'students' in tui.db._tables
 
 def test_print_menu(capsys):

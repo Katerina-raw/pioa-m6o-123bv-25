@@ -39,7 +39,6 @@ class Database:
 
     def update(self, name_table, filters, cols):
         if name_table in self._tables:
-
             self._tables[name_table].update(filters, cols)
         else:
             raise KeyError("Table {} does not exist".format(name_table))
@@ -80,15 +79,19 @@ class JSONDataBase(Database):
             json.dump(data, f)
 
     def _open_db_json(self):
-        with open(self.path, 'r', encoding="utf-8") as f:
-            try:
+        try:
+            with open(self.path, 'r', encoding="utf-8") as f:
                 data = json.load(f)
                 for table_data in data['tables']:
                     table = Table([])
                     table.table = table_data['table']
                     self._tables[table_data['table_name']] = table
-            except Exception:
-                raise EOFError('File damaged or not exist')
+        except FileNotFoundError:
+            raise FileNotFoundError('File doesnt exist')
+        except json.decoder.JSONDecodeError:
+            raise EOFError('File damaged')
+        except KeyError, ValueError, TypeError:
+            raise EOFError("File structure isn't valuable")
 
     def create_table(self, *arg, **kwargs):
         super().create_table(*arg, **kwargs)
@@ -125,14 +128,14 @@ class CSVDataBase(Database):
             table_data = table.serialize()
             save_data.append(list(table_data.keys()))
             save_data.extend(table.select())
-            with open(os.path.join(self.path, f'{table_name}.csv'), 'w') as f:
+            with open(os.path.join(self.path, f'{table_name}.csv'), 'w', encoding="utf-8", newline="") as f:
                 csv.writer(f).writerows(save_data)
 
     def _open_db_csv(self):
         try:
             files = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f)) and f.endswith('.csv')]
             for path in files:
-                with open(os.path.join(self.path, path), 'r') as f:
+                with open(os.path.join(self.path, path), 'r', encoding="utf-8", newline="") as f:
                     data = csv.reader(f)
                     header = next(data)
                     table = Table(header)
@@ -141,8 +144,12 @@ class CSVDataBase(Database):
                             table.insert({col: value for col, value in zip(header, i)})
 
                     self._tables[next(iter(path.split('.csv')))] = table
-        except Exception:
+        except FileNotFoundError:
+            raise FileNotFoundError('File doesnt exist')
+        except csv.Error:
             raise EOFError('Error while opening files')
+        except KeyError, ValueError, TypeError:
+            raise EOFError("File structure isn't valuable")
 
     def create_table(self, *arg, **kwargs):
         super().create_table(*arg, **kwargs)
@@ -197,9 +204,9 @@ class Table:
             raise KeyError("Field '{}' does not exist".format(sort_field))
 
         col_index = list(self.table.keys()).index(sort_field)
-        if all(map(lambda m: m[col_index].isdigit(), rows)):
-            rows.sort(key=lambda row: int(row[col_index]), reverse=not ascending)
-        else:
+        try:
+            rows.sort(key=lambda row: float(row[col_index]), reverse=not ascending)
+        except ValueError:
             rows.sort(key=lambda row: row[col_index], reverse=not ascending)
         return rows
 
@@ -231,6 +238,10 @@ class Table:
                 self.table[col].pop(index)
 
     def update(self, filters, cols_data):
+        for col in cols_data.keys():
+            if col not in self.table:
+                raise KeyError("Field '{}' does not exist".format(col))
+
         if not self.table:
             return
 
