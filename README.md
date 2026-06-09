@@ -9,7 +9,7 @@
 │ │ ├── __init__.py
 │ │ └── memory.py
 │ ├── __init__.py
-│ ├── main.py
+│ ├── __main__.py
 │ └── tui.py 
 ├── tests
 │ └── db/
