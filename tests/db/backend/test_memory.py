@@ -1,4 +1,5 @@
-from src.db.backend.memory import Database, JSONDataBase, CSVDataBase
+from src.db.backend.memory import Database
+from src.db.backend.file import JSONDataBase, CSVDataBase
 
 def test_create_table():
     db = Database()
